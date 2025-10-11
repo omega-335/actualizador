@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante Certificado="MIIFtjCCA56gAwIBAgIUMzAwMDEwMDAwMDA1MDAwMDM0MzQwDQYJKoZIhvcNAQELBQAwggErMQ8wDQYDVQQDDAZBQyBVQVQxLjAsBgNVBAoMJVNFUlZJQ0lPIERFIEFETUlOSVNUUkFDSU9OIFRSSUJVVEFSSUExGjAYBgNVBAsMEVNBVC1JRVMgQXV0aG9yaXR5MSgwJgYJKoZIhvcNAQkBFhlvc2Nhci5tYXJ0aW5lekBzYXQuZ29iLm14MR0wGwYDVQQJDBQzcmEgY2VycmFkYSBkZSBjYWxpejEOMAwGA1UEEQwFMDYzNzAxCzAJBgNVBAYTAk1YMRkwFwYDVQQIDBBDSVVEQUQgREUgTUVYSUNPMREwDwYDVQQHDAhDT1lPQUNBTjERMA8GA1UELRMIMi41LjQuNDUxJTAjBgkqhkiG9w0BCQITFnJlc3BvbnNhYmxlOiBBQ0RNQS1TQVQwHhcNMjMwNTE4MTI0ODU3WhcNMjcwNTE4MTI0ODU3WjCB3TEpMCcGA1UEAxMgSU5OT1ZBQ0lPTiBWQUxPUiBZIERFU0FSUk9MTE8gU0ExKTAnBgNVBCkTIElOTk9WQUNJT04gVkFMT1IgWSBERVNBUlJPTExPIFNBMSkwJwYDVQQKEyBJTk5PVkFDSU9OIFZBTE9SIFkgREVTQVJST0xMTyBTQTElMCMGA1UELRMcSVZEOTIwODEwR1UyIC8gVkFEQTgwMDkyN0RKMzEeMBwGA1UEBRMVIC8gVkFEQTgwMDkyN0hTUlNSTDA1MRMwEQYDVQQLEwpTdWN1cnNhbCAxMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqsMyIHgj/WC4HQ2kbANTwbjJQho3H4emTqZLLrGybmuGOWh7tUcPi6cG3tyzp5aryS9aVIUDdLyryL2E6WeRwF9ifhmG9FQD8PG/B9VVlj9/u7ob97jPMI1hHV9tE4zmHSQGVMQjdUWhyywPOf+Ia9gL0i2XRzK/A243dYfiFWaiG4VeLn5iSo669PS9PRKNpw725+57bLfPCYlq+JnCQD5pfDWnKiI+JCwBNS+q4xpv/eO9ife/9LpIGlobAd3OHB3Mw7Keij7GCSl98jp0gGxDU7GXnS851H9R6r4kADq49aR4kScCPukU5n865BZog2JUS1C5TT/IWgsgCu8I0wIDAQABox0wGzAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIGwDANBgkqhkiG9w0BAQsFAAOCAgEAGeGwhK3QSs/tnvK/HXoPm7/R7SgVkhj/29wSjh8VtIYk3UMMyipOz/EwSFQN+QnNQ8BxNplEmgv8M8kDobbPlGaNiMEvqKLexZtUlpSolkkfiyvPMxWGn26bNmBGObshxHCAXlRyuRMpddunRNgOJ9mzgmkmuFY7fdGPcEUrkPgIkRX37a9HgQ5v+/IMYHvbwkjaK4vA45mDPxdRw8Mjr7MO2tMds9yz59ZargvO7TlF79XmfyfnsrkkSplVEXbae+uZ80YK+YHmkuwqBmXhcKa+YbiDZkIgM7l69NKKmK258jzEkmfnpbfekwH0Lc9CDv8wqA4mNNYFaeSJflR/jeiB0Rl50ZRyiaL8ncN15AA6lS9f7BeJfow/NNR4pv2Uk8C0Io6+PhSX8az5jhV6xrult2i/+7eoM0LRRvkg7Qyp/aDpha8DoHhtDIy/g3xU0n408PkWCJceoPk/IwWgN4QiunRddXeS2eNipJ3E2VbbOoxtH5xF2IsishbTWpxCYBg+w80WgewwODG18CTCldCo3g5QrgkfcvOHvtN+EL9XAJbS6iUAOyHumRgGh3TNMIEld8DUMM6nylVcv0DRi27BnJLhbr+pbXWh0a5eU4Uear0/TXsv9IR60fNrY/7juo+OsBV7q0vKxATR4CAbR2+2/eHczloUYEgpUyYiVK8=" CondicionesDePago="CONTADO" Exportacion="01" Fecha="2025-03-09T09:38:55" Folio="6" FormaPago="01" LugarExpedicion="80090" MetodoPago="PUE" Moneda="MXN" NoCertificado="30001000000500003434" Sello="a5ijTEN9kd5hZl0kniD4r+JmDewtQxGRQugaaB6pF6KIFrvWG85lqipQt2SrXqdm22QgDulCb5etH6OTTp7WAKa/U3dilzF4EhC8ZEJ1S1mlPYALYOCBtxjC80zv6zI2YXt8zZR4rIzLnjui3VvMeArNlTYk2rb5xTQFcexGIJNg9DBEWFkF9dNxPGvl31NqPMoWwYXxmPv3kaQdnlcSVg6V0+oEJIya+ggrzcritUSiYC7GDcaA4Yd6kpm1DooKI21cuqMIlXp+J688uh5LOmDzI61UOhJZDZs1WO92nTqY2zEMm1SNRKXNpAepiX5lqNCQEjolnGqyr5azB4Bw9Q==" Serie="AE" SubTotal="802.00" TipoCambio="1" TipoDeComprobante="I" Total="930.32" Version="4.0" xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd">
+    <cfdi:Emisor Nombre="INNOVACION VALOR Y DESARROLLO" RegimenFiscal="601" Rfc="IVD920810GU2"/>
+    <cfdi:Receptor DomicilioFiscalReceptor="80200" Nombre="KRTC" RegimenFiscalReceptor="601" Rfc="KRT080123PX1" UsoCFDI="G01"/>
+    <cfdi:Conceptos>
+        <cfdi:Concepto Cantidad="1" ClaveProdServ="46181708" ClaveUnidad="AB" Descripcion="MALLA P/CABELLO TRICOT CON ELASTIC PANAL 2" Importe="2.00" NoIdentificacion="0038" ObjetoImp="02" Unidad="Paquete a granel" ValorUnitario="2.00">
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="2.00" Importe="0.32" Impuesto="002" TasaOCuota="0.160000" TipoFactor="Tasa"/>
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+        </cfdi:Concepto>
+        <cfdi:Concepto Cantidad="1" ClaveProdServ="56101500" ClaveUnidad="AB" Descripcion="ESQUINERO DE 24&quot; " Importe="200.00" NoIdentificacion="0815" ObjetoImp="02" Unidad="Paquete a granel" ValorUnitario="200.00">
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="200.00" Importe="32.00" Impuesto="002" TasaOCuota="0.160000" TipoFactor="Tasa"/>
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+        </cfdi:Concepto>
+        <cfdi:Concepto Cantidad="1" ClaveProdServ="56101500" ClaveUnidad="AB" Descripcion="ESQUINERO DE 24&quot; 1" Importe="200.00" NoIdentificacion="0815" ObjetoImp="02" Unidad="Paquete a granel" ValorUnitario="200.00">
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="200.00" Importe="32.00" Impuesto="002" TasaOCuota="0.160000" TipoFactor="Tasa"/>
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+        </cfdi:Concepto>
+        <cfdi:Concepto Cantidad="1" ClaveProdServ="56101500" ClaveUnidad="AB" Descripcion="ESQUINERO DE 24&quot; 3" Importe="200.00" NoIdentificacion="0815" ObjetoImp="02" Unidad="Paquete a granel" ValorUnitario="200.00">
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="200.00" Importe="32.00" Impuesto="002" TasaOCuota="0.160000" TipoFactor="Tasa"/>
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+        </cfdi:Concepto>
+        <cfdi:Concepto Cantidad="1" ClaveProdServ="56101500" ClaveUnidad="AB" Descripcion="ESQUINERO DE 24&quot; 4" Importe="200.00" NoIdentificacion="0815" ObjetoImp="02" Unidad="Paquete a granel" ValorUnitario="200.00">
+            <cfdi:Impuestos>
+                <cfdi:Traslados>
+                    <cfdi:Traslado Base="200.00" Importe="32.00" Impuesto="002" TasaOCuota="0.160000" TipoFactor="Tasa"/>
+                </cfdi:Traslados>
+            </cfdi:Impuestos>
+        </cfdi:Concepto>
+    </cfdi:Conceptos>
+    <cfdi:Impuestos TotalImpuestosTrasladados="128.32">
+        <cfdi:Traslados>
+            <cfdi:Traslado Base="802.00" Importe="128.32" Impuesto="002" TasaOCuota="0.160000" TipoFactor="Tasa"/>
+        </cfdi:Traslados>
+    </cfdi:Impuestos>
+<cfdi:Complemento><tfd:TimbreFiscalDigital FechaTimbrado="2025-03-09T10:39:12" Leyenda="Timbre de prueba" NoCertificadoSAT="30001000000500003456" RfcProvCertif="SPR190613I52" SelloCFD="a5ijTEN9kd5hZl0kniD4r+JmDewtQxGRQugaaB6pF6KIFrvWG85lqipQt2SrXqdm22QgDulCb5etH6OTTp7WAKa/U3dilzF4EhC8ZEJ1S1mlPYALYOCBtxjC80zv6zI2YXt8zZR4rIzLnjui3VvMeArNlTYk2rb5xTQFcexGIJNg9DBEWFkF9dNxPGvl31NqPMoWwYXxmPv3kaQdnlcSVg6V0+oEJIya+ggrzcritUSiYC7GDcaA4Yd6kpm1DooKI21cuqMIlXp+J688uh5LOmDzI61UOhJZDZs1WO92nTqY2zEMm1SNRKXNpAepiX5lqNCQEjolnGqyr5azB4Bw9Q==" SelloSAT="DAzf7klQb8r5L1dtFInu8eeqYZNRydAyK9uFPO9urwr+o+c6+BuxLDMRCFKuRokvNq7sXA6UOfW4UZvRuwhBrAN0hdkKKsgrmD4cTboEBAQzg83DFwAFRVna9LDIJMwog7Ok7pFwLL+HHEtgWD7yCGankADcfRGTjGtaMTH9MvbBAwRkv+rZUnKruoG+SfgO9SCxCmWy0p86Q2SQARnE486fBM655thIAqWjP1vTWHJGdpbKMaJqYnQ8nImwibK6iymYWfAq5m4T4C09lvg4xrdsqhxkRfE3ovqCDgZCyQ1T/k0V1ePfs+uHtY9GarMp+PSL0cVpaezZwjYvXYl2mw==" UUID="be203d49-ad95-4a90-a5fb-68c5ee8d1a00" Version="1.1" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd"/></cfdi:Complemento></cfdi:Comprobante>
