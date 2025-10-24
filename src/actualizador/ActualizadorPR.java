@@ -646,10 +646,6 @@ public class ActualizadorPR extends javax.swing.JFrame {
         return archivosDescargados;
     }
 
-
-
-    //borrar hasta el metodo de es archivo mas receiente con contro z si falla 
-
     private int obtenerVersionMasAltaDeCarpeta(String rutaCarpeta) {
         try {
             Vector<ChannelSftp.LsEntry> archivos = conexionSFTP.listarArchivos(rutaCarpeta);
@@ -714,9 +710,6 @@ public class ActualizadorPR extends javax.swing.JFrame {
         }
     }
 
-
-
-
     /**
      * Determina si un archivo debe descargarse basado en el último archivo descargado
      * Los archivos vienen ordenados naturalmente por nombre (fecha + secuencia)
@@ -754,9 +747,6 @@ public class ActualizadorPR extends javax.swing.JFrame {
         // Por seguridad, descargar solo si no encontramos el último
         return !encontradoUltimo;
     }
-
-
-    //si llegamos hasta aqui con cotrol z es que ya funciona el cierre por conteo con pausa y pasamos a los metodos de forzar descargas 
 
     /**
      * Descarga TODAS las actualizaciones ignorando el control de versiones
@@ -844,8 +834,8 @@ public class ActualizadorPR extends javax.swing.JFrame {
 
 
     /**
-     * Versión forzada que ignora completamente el control de versiones
-     */
+    * Versión forzada que ignora completamente el control de versiones
+    */
     private int descargarActualizacionesDeCarpetaForzado(StringBuilder log, String rutaCarpeta, 
                                                          String tipoDescarga, String rfcCliente) {
         int archivosDescargados = 0;
@@ -1044,9 +1034,7 @@ public class ActualizadorPR extends javax.swing.JFrame {
         }
     }
        
-    
-    
-    
+        
     private void mostrarLineaPorLinea(JTextArea textArea, String texto) {
         new Thread(() -> {
             String[] lineas = texto.split("\n");
@@ -1158,19 +1146,10 @@ public class ActualizadorPR extends javax.swing.JFrame {
 
         textArea1.setText("Iniciando la secuencia de conexión y búsqueda de archivos...");
 
-
         textArea1.setEditable(false);
 
-
         // Mantenemos el ajuste de línea (LineWrap) para evitar el descuadre horizontal
-        textArea1.setLineWrap(true);    
-
-
-        // Eliminamos todas las configuraciones de color manuales (setForeground, setBackground)
-        // para permitir que FlatLaf lo maneje correctamente.
-
-        // 4. Configurar Resumen y Botones
-
+        textArea1.setLineWrap(true);           
 
         // 5. Configurar la Ventana y el Listener de Cierre (MANTENER ESTO ES VITAL)
         setTitle("Actualizador v1.2.0");
@@ -1186,7 +1165,7 @@ public class ActualizadorPR extends javax.swing.JFrame {
     }
     
 
-  private void hacerVentanaNoCerrable() {
+    private void hacerVentanaNoCerrable() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         getRootPane().setWindowDecorationStyle(JRootPane.NONE);
 
@@ -1195,7 +1174,7 @@ public class ActualizadorPR extends javax.swing.JFrame {
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 // ✅ PRIMERO el contador
                 try { 
-                    Thread.sleep(300000); // 5 segundos de espera
+                    Thread.sleep(3000); // 5 segundos de espera
                 } catch (InterruptedException e) { }
 
                 // ✅ LUEGO el mensaje
