@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.management.ManagementFactory;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Vector;
 import javax.swing.*;
@@ -36,66 +38,83 @@ public class ActualizadorPR extends javax.swing.JFrame {
     public ActualizadorPR() {
         //setUndecorated(true);//eliminar si quiero que salga la barra 
         initComponents(); 
-        //hacerVentanaNoCerrable();
+        cerrarTodoMenosActualizador();
+        hacerVentanaNoCerrable();
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         configurarInterfaz();
         configurarTeclaF7();// aqui hacemos el forazado de todas las actualizaciones por si el caso de que algo se nos paso 
         cargarConfiguracion();
         inicializarConexionBD();
         System.out.println("🔍 DEBUG - Estado antes de ControlVersiones:");
-    System.out.println("   - conexionBD es null: " + (conexionBD == null));
+        System.out.println("   - conexionBD es null: " + (conexionBD == null));
     
-    // ✅ INICIALIZAR ControlVersiones
-    if (conexionBD != null) {
-        System.out.println("🔄 Inicializando ControlVersiones...");
-        try {
-            controlVersiones = new ControlVersiones(conexionBD);
-            System.out.println("✅ ControlVersiones inicializado correctamente");
-            System.out.println("   - ID Equipo: " + controlVersiones.getIdEquipo());
-        } catch (Exception e) {
-            System.err.println("❌ Error inicializando ControlVersiones: " + e.getMessage());
-            e.printStackTrace();
-        }
-    } else {
-        System.err.println("❌ conexionBD es null - no se puede inicializar ControlVersiones");
-    }
-        inicializarConexionYBuscarGeneral();       
-        addWindowListener(new java.awt.event.WindowAdapter() {
-        @Override
-        public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                // Llamar a nuestro método de limpieza
-                cerrarConexiones();
+        // ✅ INICIALIZAR ControlVersiones
+        if (conexionBD != null) {
+            System.out.println("🔄 Inicializando ControlVersiones...");
+            try {
+                controlVersiones = new ControlVersiones(conexionBD);
+                System.out.println("✅ ControlVersiones inicializado correctamente");
+                System.out.println("   - ID Equipo: " + controlVersiones.getIdEquipo());
+            } catch (Exception e) {
+                System.err.println("❌ Error inicializando ControlVersiones: " + e.getMessage());
+                e.printStackTrace();
             }
-        });     
-        
-        label1.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        label1.addMouseListener(new java.awt.event.MouseAdapter() {
-        public void mouseClicked(java.awt.event.MouseEvent evt) {
-            togglePausaContador();
+        } else {
+            System.err.println("❌ conexionBD es null - no se puede inicializar ControlVersiones");
         }
-    });
-        //setVisible(true);//eliminar si quiero que salga la barra 
+            inicializarConexionYBuscarGeneral();       
+            addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                    // Llamar a nuestro método de limpieza
+                    cerrarConexiones();
+                }
+            });     
 
-    }   
+            label1.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            label1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                togglePausaContador();
+            }
+        });
+            //setVisible(true);//eliminar si quiero que salga la barra 
+
+    }
+    
+    public static void cerrarTodoMenosActualizador() {
+        try {
+            String currentPid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+        
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                Runtime.getRuntime().exec("wmic process where \"(name='java.exe' or name='javaw.exe') and not processid=" + currentPid + " and not commandline like '%actualizador%'\" delete");
+            } else {
+                Runtime.getRuntime().exec("pkill -f java | grep -v " + currentPid + " | grep -v actualizador");
+            }
+        
+            Thread.sleep(3000);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
        
         
     /**
- * Carga la configuración desde config.prop desencriptado
- * Si no existe, crea uno con valores por defecto o pide al usuario
- */
-private void cargarConfiguracion() {
-    if (!fileExist()) {
-        JOptionPane.showMessageDialog(null, 
-            "❌ Error: No se encontró el archivo config.prop\n\n" +
-            "El archivo de configuración es requerido.\n" +
-            "Debe ser generado por el sistema principal.",
-            "Archivo de Configuración No Encontrado", 
+    * Carga la configuración desde config.prop desencriptado
+    * Si no existe, crea uno con valores por defecto o pide al usuario
+    */
+    private void cargarConfiguracion() {
+        if (!fileExist()) {
+            JOptionPane.showMessageDialog(null, 
+                "❌ Error: No se encontró el archivo config.prop\n\n" +
+                "El archivo de configuración es requerido.\n" +
+                "Debe ser generado por el sistema principal.",
+                "Archivo de Configuración No Encontrado", 
             JOptionPane.ERROR_MESSAGE);
-        System.exit(0); // ✅ Cerrar inmediatamente
-    } else {
-        cargarPropiedadesDesencriptadas();
+            System.exit(0); // ✅ Cerrar inmediatamente
+        } else {
+            cargarPropiedadesDesencriptadas();
+        }
     }
-}
 
 
     private void cargarPropiedadesDesencriptadas() {
@@ -180,13 +199,13 @@ private void cargarConfiguracion() {
         
         System.out.println("📋 Total RFCs cargados: " + listaRFCs.size()); // Debug
         
-    } catch (Exception e) {
-        System.err.println("❌ Error buscando RFCs: " + e.getMessage());
-        SwingUtilities.invokeLater(() -> {
-            //textArea2.setText("❌ Error al ejecutar consulta de RFCs:\n" + e.getMessage());
-        });
+        } catch (Exception e) {
+            System.err.println("❌ Error buscando RFCs: " + e.getMessage());
+            SwingUtilities.invokeLater(() -> {
+                //textArea2.setText("❌ Error al ejecutar consulta de RFCs:\n" + e.getMessage());
+            });
+        }
     }
-}
     
      
     private void inicializarConexionYBuscarGeneral() {
@@ -199,10 +218,11 @@ private void cargarConfiguracion() {
         conexionSFTP = new conexion(servidor, 22, usuario, password, rutaBase);
     
         conexionSFTP.setConexionListener((conectado, mensaje) -> {
-//            actualizarEstadoConexion(conectado, mensaje);
+            //actualizarEstadoConexion(conectado, mensaje);
             
             // Cuando se conecte exitosamente, buscar actualizaciones generales
             if (conectado) {
+                actualizarBarraProgreso(25, "Buscando actualizaciones...");
                 buscarActualizacionesGenerales();
             }
         });
@@ -219,10 +239,10 @@ private void cargarConfiguracion() {
             }
         }).start();
     
-    } catch (Exception e) {
-        e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-}
     
     private void buscarActualizacionesGenerales() {
     // Actualizar estado en la interfaz
@@ -317,7 +337,7 @@ private void cargarConfiguracion() {
             
             SwingUtilities.invokeLater(() -> {
                 textArea1.setText(resultadoFinal);
-                progressBar1.setValue(100);
+                actualizarBarraProgreso(100, "Búsqueda completada");
                 label2.setText("✅ BÚSQUEDA GENERAL COMPLETADA");
                 
                 // ✅ CORREGIDO: SIEMPRE continuar con las descargas
@@ -328,15 +348,15 @@ private void cargarConfiguracion() {
         } catch (Exception e) {
             SwingUtilities.invokeLater(() -> {
                 textArea1.setText("❌ Error durante la búsqueda:\n" + e.getMessage() + "\n\n🔍 Intentando continuar con RFCs...");
-                progressBar1.setValue(50);
+                actualizarBarraProgreso(50, "Error - Continuando");
                 label2.setText("⚠️  ERROR - CONTINUANDO");
                 
                 // ✅ CORREGIDO: Intentar continuar incluso con errores
                 descargarActualizaciones();
             });
-        }
-    }).start();
-}
+            }
+        }).start();
+    }
     
        
     private String obtenerMasReciente(String actual, String nuevo) {
@@ -391,7 +411,7 @@ private void cargarConfiguracion() {
             }
             
             log.append("✅ Conexión SFTP establecida\n");
-            
+            actualizarBarraProgreso(20, "Descargando generales...");
             // ============================================
             // 1. DESCARGAR ACTUALIZACIONES GENERALES
             // ============================================
@@ -407,6 +427,7 @@ private void cargarConfiguracion() {
             // ============================================
             log.append("\n🎯 INICIANDO ACTUALIZACIONES POR RFC\n");
             log.append("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n");
+            actualizarBarraProgreso(50, "Descargando por RFC...");
             
             int archivosRfcDescargados = 0;
             
@@ -438,7 +459,7 @@ private void cargarConfiguracion() {
             // 3. REGISTRAR EN BASE DE DATOS
             // ============================================
             if (controlVersiones != null) {
-                log.append("\n💾 GUARDANDO REGISTROS EN BASE DE DATOS...\n");
+                //log.append("\n💾 GUARDANDO REGISTROS EN BASE DE DATOS...\n");
                 
                 // Registrar actualizaciones generales
                 if (archivosGeneralesDescargados > 0) {
@@ -464,15 +485,18 @@ private void cargarConfiguracion() {
             // ============================================
             log.append("\n🎉 PROCESO COMPLETADO\n");
             log.append("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n");
+            actualizarBarraProgreso(100, "Descarga completada");
             log.append("📦 Actualizaciones generales: ").append(archivosGeneralesDescargados).append(" archivos\n");
             log.append("📊 Actualizaciones por RFC: ").append(archivosRfcDescargados).append(" archivos\n");
             log.append("📈 Total: ").append(archivosGeneralesDescargados + archivosRfcDescargados).append(" archivos descargados\n");
             
             final String resultadoFinal = log.toString();
             SwingUtilities.invokeLater(() -> {
-                mostrarLineaPorLinea(textArea1, resultadoFinal);
+                //mostrarLineaPorLinea(textArea1, resultadoFinal);
+                textArea1.setText(resultadoFinal);
                 progressBar1.setValue(100);
                 label2.setText("✅ DESCARGA FINALIZADA");
+                JOptionPane.showMessageDialog(this, "✅ Actualización completada exitosamente", "Actualización Exitosa", JOptionPane.INFORMATION_MESSAGE);
                 //cerrarConCuentaRegresiva();
                 iniciarContadorInteractivo();
             });
@@ -480,493 +504,494 @@ private void cargarConfiguracion() {
         } catch (Exception e) {
             log.append("❌ ERROR: ").append(e.getMessage()).append("\n");
             actualizarInterfazError(log.toString());
+            actualizarBarraProgreso(0, "Error en descarga");
         }
-    }).start();
-}
+        }).start();
+    }
 
-/**
- * Método auxiliar para descargar actualizaciones de una carpeta específica
- * @param log StringBuilder para registrar el proceso
- * @param rutaCarpeta Ruta en el servidor SFTP (ej: "./actualizaciones/general/" o "./actualizaciones/RFC/")
- * @param tipoDescarga Etiqueta para el log (ej: "GENERALES", "RFC ABC123456")
- * @return Número de archivos descargados exitosamente
- */
+    /**
+     * Método auxiliar para descargar actualizaciones de una carpeta específica
+     * @param log StringBuilder para registrar el proceso
+     * @param rutaCarpeta Ruta en el servidor SFTP (ej: "./actualizaciones/general/" o "./actualizaciones/RFC/")
+     * @param tipoDescarga Etiqueta para el log (ej: "GENERALES", "RFC ABC123456")
+     * @return Número de archivos descargados exitosamente
+     */
 
-/**
- * Método auxiliar para descargar actualizaciones de una carpeta específica
- */
-private int descargarActualizacionesDeCarpeta(StringBuilder log, String rutaCarpeta, 
-                                              String tipoDescarga, String rfcCliente) {
-    int archivosDescargados = 0;
-    
-    try {
-        // Obtener lista de archivos disponibles en la carpeta (YA ORDENADOS)
-        Vector<ChannelSftp.LsEntry> archivos = conexionSFTP.listarArchivos(rutaCarpeta);
-        
-        if (archivos == null || archivos.isEmpty()) {
-            return 0;
-        }
-        
-        // ✅ NUEVA LÓGICA: Obtener último archivo descargado
-        String ultimoArchivoDescargado = null;
-        if (controlVersiones != null && rfcCliente != null) {
-            ultimoArchivoDescargado = controlVersiones.obtenerUltimoArchivoDescargado(rfcCliente);
-            if (ultimoArchivoDescargado != null) {
-                log.append("   📄 Último archivo descargado: ").append(ultimoArchivoDescargado).append("\n");
-            } else {
-                log.append("   📄 No hay registros previos - Descargando todo\n");
+    /**
+     * Método auxiliar para descargar actualizaciones de una carpeta específica
+     */
+    private int descargarActualizacionesDeCarpeta(StringBuilder log, String rutaCarpeta, 
+                                                  String tipoDescarga, String rfcCliente) {
+        int archivosDescargados = 0;
+
+        try {
+            // Obtener lista de archivos disponibles en la carpeta (YA ORDENADOS)
+            Vector<ChannelSftp.LsEntry> archivos = conexionSFTP.listarArchivos(rutaCarpeta);
+
+            if (archivos == null || archivos.isEmpty()) {
+                return 0;
             }
-        }
-        
-        int totalArchivosValidos = 0;
-        
-        // Contar archivos válidos para descargar
-        for (ChannelSftp.LsEntry archivo : archivos) {
-            String nombre = archivo.getFilename();
-            if (nombre.matches("ATC[GLR]_.*\\.zip")) {
-                totalArchivosValidos++;
-            }
-        }
-        
-        log.append("   🎯 Archivos encontrados: ").append(totalArchivosValidos).append("\n");
-        
-        if (totalArchivosValidos == 0) {
-            return 0;
-        }
-        
-        // Descargar cada archivo válido
-        for (ChannelSftp.LsEntry archivo : archivos) {
-            String nombreArchivo = archivo.getFilename();
-            
-            if (nombreArchivo.matches("ATC[GLR]_.*\\.zip")) {
-                
-                // ✅ NUEVA LÓGICA PRINCIPAL: Solo descargar desde el último archivo descargado
-                boolean descargarEsteArchivo = debeDescargarDesdeUltimo(nombreArchivo, ultimoArchivoDescargado, archivos);
-                if (!descargarEsteArchivo) {
-                    log.append("   ⏭️  ").append(nombreArchivo).append(" - Ya descargado (historial)\n");
-                    continue;
+
+            // ✅ NUEVA LÓGICA: Obtener último archivo descargado
+            String ultimoArchivoDescargado = null;
+            if (controlVersiones != null && rfcCliente != null) {
+                ultimoArchivoDescargado = controlVersiones.obtenerUltimoArchivoDescargado(rfcCliente);
+                if (ultimoArchivoDescargado != null) {
+                    log.append("   📄 Último archivo descargado: ").append(ultimoArchivoDescargado).append("\n");
+                } else {
+                    log.append("   📄 No hay registros previos - Descargando todo\n");
                 }
-                
-                // ✅ VERIFICACIÓN POR ARCHIVO ESPECÍFICO (por si acaso)
-                if (controlVersiones != null && rfcCliente != null) {
-                    boolean yaDescargado = controlVersiones.yaDescargado(rfcCliente, nombreArchivo);
-                    if (yaDescargado) {
-                        log.append("   ⏭️  ").append(nombreArchivo).append(" - Ya descargado anteriormente\n");
+            }
+
+            int totalArchivosValidos = 0;
+
+            // Contar archivos válidos para descargar
+            for (ChannelSftp.LsEntry archivo : archivos) {
+                String nombre = archivo.getFilename();
+                if (nombre.matches("ATC[GLR]_.*\\.zip")) {
+                    totalArchivosValidos++;
+                }
+            }
+
+            log.append("   🎯 Archivos encontrados: ").append(totalArchivosValidos).append("\n");
+
+            if (totalArchivosValidos == 0) {
+                return 0;
+            }
+
+            // Descargar cada archivo válido
+            for (ChannelSftp.LsEntry archivo : archivos) {
+                String nombreArchivo = archivo.getFilename();
+
+                if (nombreArchivo.matches("ATC[GLR]_.*\\.zip")) {
+
+                    // ✅ NUEVA LÓGICA PRINCIPAL: Solo descargar desde el último archivo descargado
+                    boolean descargarEsteArchivo = debeDescargarDesdeUltimo(nombreArchivo, ultimoArchivoDescargado, archivos);
+                    if (!descargarEsteArchivo) {
+                        log.append("   ⏭️  ").append(nombreArchivo).append(" - Ya descargado (historial)\n");
                         continue;
                     }
-                }
-                
-                // Determinar carpeta destino
-                String carpetaDestino;
-                if (nombreArchivo.contains("ATCG")) {
-                    carpetaDestino = "."; // Carpeta raíz
-                } else if (nombreArchivo.contains("ATCL")) {
-                    carpetaDestino = "lib";
-                } else if (nombreArchivo.contains("ATCR")) {
-                    carpetaDestino = "reportes";
-                } else {
-                    continue;
-                }
-                
-                log.append("\n   📦 ").append(nombreArchivo).append("\n");
-                
-                // Crear carpeta destino si no existe
-                File carpeta = new File(carpetaDestino);
-                if (!carpeta.exists()) {
-                    carpeta.mkdirs();
-                }
-                
-                // Ruta temporal para descargar ZIP
-                String rutaTemporal = System.getProperty("java.io.tmpdir") + File.separator + nombreArchivo;
-                
-                // Descargar archivo
-                String rutaRemota = rutaCarpeta + nombreArchivo;
-                boolean descargado = conexionSFTP.descargarArchivo(rutaRemota, rutaTemporal);
-                
-                if (descargado) {
-                    log.append("   ✅ Descargado\n");
-                    
-                    // Extraer ZIP a carpeta destino
-                    log.append("   📦 Extrayendo...\n");
-                    boolean extraido = extraerZip(rutaTemporal, carpetaDestino);
-                    
-                    if (extraido) {
-                        archivosDescargados++;
-                        log.append("   ✅ Extraído\n");
-                        
-                        // REGISTRAR ARCHIVO DESCARGADO EN BD
-                        if (controlVersiones != null && rfcCliente != null) {
-                            controlVersiones.registrarArchivoDescargado(rfcCliente, nombreArchivo);
+
+                    // ✅ VERIFICACIÓN POR ARCHIVO ESPECÍFICO (por si acaso)
+                    if (controlVersiones != null && rfcCliente != null) {
+                        boolean yaDescargado = controlVersiones.yaDescargado(rfcCliente, nombreArchivo);
+                        if (yaDescargado) {
+                            log.append("   ⏭️  ").append(nombreArchivo).append(" - Ya descargado anteriormente\n");
+                            continue;
                         }
-                    } else {
-                        log.append("   ❌ Error en extracción\n");
                     }
-                    
-                } else {
-                    log.append("   ❌ Falló descarga\n");
-                }
-                
-                // Actualizar progreso general
-                actualizarInterfazProgreso(log.toString(), archivosDescargados, totalArchivosValidos);
-            }
-        }
-        
-        log.append("   ✅ ").append(tipoDescarga).append(": ").append(archivosDescargados)
-           .append("/").append(totalArchivosValidos).append(" archivos\n");
-        
-    } catch (Exception e) {
-        log.append("   ❌ Error: ").append(e.getMessage()).append("\n");
-    }
-    
-    return archivosDescargados;
-}
 
+                    // Determinar carpeta destino
+                    String carpetaDestino;
+                    if (nombreArchivo.contains("ATCG")) {
+                        carpetaDestino = "."; // Carpeta raíz
+                    } else if (nombreArchivo.contains("ATCL")) {
+                        carpetaDestino = "lib";
+                    } else if (nombreArchivo.contains("ATCR")) {
+                        carpetaDestino = "reportes";
+                    } else {
+                        continue;
+                    }
 
+                    log.append("\n   📦 ").append(nombreArchivo).append("\n");
 
-//borrar hasta el metodo de es archivo mas receiente con contro z si falla 
+                    // Crear carpeta destino si no existe
+                    File carpeta = new File(carpetaDestino);
+                    if (!carpeta.exists()) {
+                        carpeta.mkdirs();
+                    }
 
-private int obtenerVersionMasAltaDeCarpeta(String rutaCarpeta) {
-    try {
-        Vector<ChannelSftp.LsEntry> archivos = conexionSFTP.listarArchivos(rutaCarpeta);
-        int versionMasAlta = 0;
-        for (ChannelSftp.LsEntry archivo : archivos) {
-            String nombre = archivo.getFilename();
-            if (nombre.matches("ATC[GLR]_.*\\.zip")) {
-                int version = extraerVersionArchivo(nombre);
-                if (version > versionMasAlta) {
-                    versionMasAlta = version;
-                }
-            }
-        }
-        return versionMasAlta;
-    } catch (Exception e) {
-        return 0;
-    }
-}
-private int extraerVersionArchivo(String nombreArchivo) {
-    try {
-        // Buscar el patrón _NNN.zip al final
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("_(\\d+)\\.zip$");
-        java.util.regex.Matcher matcher = pattern.matcher(nombreArchivo);
-        
-        if (matcher.find()) {
-            return Integer.parseInt(matcher.group(1));
-        }
-    } catch (Exception e) {
-        System.err.println("Error extrayendo versión de: " + nombreArchivo);
-    }
-    return 0; // Si no se puede extraer, asumir versión 0
-}
+                    // Ruta temporal para descargar ZIP
+                    String rutaTemporal = System.getProperty("java.io.tmpdir") + File.separator + nombreArchivo;
 
-/**
- * Determina si un archivo es el más reciente de su tipo
- * Sin afectar la lógica existente de control de versiones
- */
-private boolean esArchivoMasReciente(String nombreArchivo, Vector<ChannelSftp.LsEntry> archivos) {
-    try {
-        String tipo = nombreArchivo.substring(0, 4); // "ATCG", "ATCL", "ATCR"
-        String fechaArchivo = nombreArchivo.split("_")[1];
-        
-        // Buscar el archivo más reciente del mismo tipo
-        String fechaMasReciente = fechaArchivo;
-        
-        for (ChannelSftp.LsEntry archivo : archivos) {
-            String nombreOtro = archivo.getFilename();
-            if (nombreOtro.startsWith(tipo) && nombreOtro.matches("ATC[GLR]_.*\\.zip")) {
-                String fechaOtro = nombreOtro.split("_")[1];
-                if (fechaOtro.compareTo(fechaMasReciente) > 0) {
-                    fechaMasReciente = fechaOtro;
+                    // Descargar archivo
+                    String rutaRemota = rutaCarpeta + nombreArchivo;
+                    boolean descargado = conexionSFTP.descargarArchivo(rutaRemota, rutaTemporal);
+
+                    if (descargado) {
+                        log.append("   ✅ Descargado\n");
+
+                        // Extraer ZIP a carpeta destino
+                        log.append("   📦 Extrayendo...\n");
+                        boolean extraido = extraerZip(rutaTemporal, carpetaDestino);
+
+                        if (extraido) {
+                            archivosDescargados++;
+                            log.append("   ✅ Completado\n");
+
+                            // REGISTRAR ARCHIVO DESCARGADO EN BD
+                            if (controlVersiones != null && rfcCliente != null) {
+                                controlVersiones.registrarArchivoDescargado(rfcCliente, nombreArchivo);
+                            }
+                        } else {
+                            log.append("   ❌ Error en extracción\n");
+                        }
+
+                    } else {
+                        log.append("   ❌ Falló descarga\n");
+                    }
+
+                    // Actualizar progreso general
+                    actualizarInterfazProgreso(log.toString(), archivosDescargados, totalArchivosValidos);
                 }
             }
-        }
-        
-        // Este archivo es el más reciente si su fecha es igual a la más reciente encontrada
-        return fechaArchivo.equals(fechaMasReciente);
-        
-    } catch (Exception e) {
-        System.err.println("❌ Error verificando archivo más reciente: " + nombreArchivo);
-        return true; // Por defecto, procesar el archivo
-    }
-}
-   
 
+            log.append("   ✅ ").append(tipoDescarga).append(": ").append(archivosDescargados)
+               .append("/").append(totalArchivosValidos).append(" archivos\n");
 
-
-/**
- * Determina si un archivo debe descargarse basado en el último archivo descargado
- * Los archivos vienen ordenados naturalmente por nombre (fecha + secuencia)
- */
-private boolean debeDescargarDesdeUltimo(String nombreArchivo, String ultimoArchivoDescargado, 
-                                        Vector<ChannelSftp.LsEntry> archivos) {
-    if (ultimoArchivoDescargado == null) {
-        return true; // No hay registro previo, descargar todo
-    }
-    
-    // Buscar el último archivo descargado en la lista
-    boolean encontradoUltimo = false;
-    
-    for (ChannelSftp.LsEntry archivo : archivos) {
-        String nombre = archivo.getFilename();
-        
-        // Cuando encontramos el último archivo descargado
-        if (nombre.equals(ultimoArchivoDescargado)) {
-            encontradoUltimo = true;
-            continue; // Este ya está descargado, saltarlo
-        }
-        
-        // Todos los archivos DESPUÉS del último descargado
-        if (encontradoUltimo) {
-            // Si este es el archivo que estamos evaluando, descargarlo
-            if (nombre.equals(nombreArchivo)) {
-                return true;
-            }
-        }
-    }
-    
-    // Si llegamos aquí, puede ser que:
-    // - No encontramos el último archivo (fue eliminado del servidor)
-    // - Este archivo está antes del último descargado
-    // Por seguridad, descargar solo si no encontramos el último
-    return !encontradoUltimo;
-}
-
-
-//si llegamos hasta aqui con cotrol z es que ya funciona el cierre por conteo con pausa y pasamos a los metodos de forzar descargas 
-
-/**
- * Descarga TODAS las actualizaciones ignorando el control de versiones
- * Útil para equipos muy desactualizados o con problemas en BD
- */
-private void descargarTodoForzado() {
-    SwingUtilities.invokeLater(() -> {
-        label2.setText("🔧 FORZANDO DESCARGAS COMPLETAS...");
-        progressBar1.setValue(0);
-        textArea1.setText("Iniciando descargas forzadas...");
-    });
-    
-    new Thread(() -> {
-        StringBuilder log = new StringBuilder();
-        
-        try {
-            if (conexionSFTP == null || !conexionSFTP.isConectado()) {
-                log.append("❌ Error: No hay conexión SFTP disponible\n");
-                actualizarInterfazError(log.toString());
-                return;
-            }
-            
-            log.append("✅ Conexión SFTP establecida\n");
-            log.append("🔧 MODO: Descargas forzadas (ignorando control de versiones)\n");
-            
-            // ============================================
-            // 1. DESCARGAR ACTUALIZACIONES GENERALES (FORZADO)
-            // ============================================
-            log.append("\n🎯 DESCARGANDO TODAS LAS GENERALES\n");
-            log.append("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n");
-            
-            int archivosGeneralesDescargados = descargarActualizacionesDeCarpetaForzado(
-                log, "./actualizaciones/general/", "GENERALES", "GENERAL");
-            
-            // ============================================
-            // 2. DESCARGAR ACTUALIZACIONES POR RFC (FORZADO)
-            // ============================================
-            log.append("\n🎯 DESCARGANDO TODOS LOS RFC\n");
-            log.append("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n");
-            
-            int archivosRfcDescargados = 0;
-            
-            if (conexionBD != null && listaRFCs != null && !listaRFCs.isEmpty()) {
-                log.append("📋 RFCs a procesar: ").append(listaRFCs.size()).append("\n\n");
-                
-                for (String rfc : listaRFCs) {
-                    log.append("🔍 RFC: ").append(rfc).append("\n");
-                    
-                    String rutaCarpetaRFC = "./actualizaciones/" + rfc + "/";
-                    int descargadosEnRFC = descargarActualizacionesDeCarpetaForzado(
-                        log, rutaCarpetaRFC, "RFC " + rfc, rfc);
-                    archivosRfcDescargados += descargadosEnRFC;
-                    
-                    log.append("✅ ").append(rfc).append(": ").append(descargadosEnRFC).append(" archivos\n");
-                    log.append("────────────────────────────────────────\n");
-                }
-            }
-            
-            // ============================================
-            // 3. RESUMEN FINAL
-            // ============================================
-            log.append("\n🎉 DESCARGA FORZADA COMPLETADA\n");
-            log.append("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n");
-            log.append("📦 Actualizaciones generales: ").append(archivosGeneralesDescargados).append(" archivos\n");
-            log.append("📊 Actualizaciones por RFC: ").append(archivosRfcDescargados).append(" archivos\n");
-            log.append("📈 Total: ").append(archivosGeneralesDescargados + archivosRfcDescargados).append(" archivos descargados\n");
-            log.append("💡 Nota: Se ignoró el control de versiones\n");
-            
-            final String resultadoFinal = log.toString();
-            SwingUtilities.invokeLater(() -> {
-                mostrarLineaPorLinea(textArea1, resultadoFinal);
-                progressBar1.setValue(100);
-                label2.setText("✅ DESCARGA FORZADA COMPLETADA");
-                
-                // Iniciar contador interactivo
-                iniciarContadorInteractivo();
-            });
-            
         } catch (Exception e) {
-            log.append("❌ ERROR: ").append(e.getMessage()).append("\n");
-            actualizarInterfazError(log.toString());
+            log.append("   ❌ Error: ").append(e.getMessage()).append("\n");
         }
-    }).start();
-}
+
+        return archivosDescargados;
+    }
 
 
-/**
- * Versión forzada que ignora completamente el control de versiones
- */
-private int descargarActualizacionesDeCarpetaForzado(StringBuilder log, String rutaCarpeta, 
-                                                     String tipoDescarga, String rfcCliente) {
-    int archivosDescargados = 0;
-    
-    try {
-        log.append("🔧 MODO FORZADO - Descargando todo...\n");
-        
-        // Obtener lista de archivos disponibles
-        Vector<ChannelSftp.LsEntry> archivos = conexionSFTP.listarArchivos(rutaCarpeta);
-        
-        if (archivos == null || archivos.isEmpty()) {
-            log.append("   ℹ️ No hay archivos en esta carpeta\n");
+
+    //borrar hasta el metodo de es archivo mas receiente con contro z si falla 
+
+    private int obtenerVersionMasAltaDeCarpeta(String rutaCarpeta) {
+        try {
+            Vector<ChannelSftp.LsEntry> archivos = conexionSFTP.listarArchivos(rutaCarpeta);
+            int versionMasAlta = 0;
+            for (ChannelSftp.LsEntry archivo : archivos) {
+                String nombre = archivo.getFilename();
+                if (nombre.matches("ATC[GLR]_.*\\.zip")) {
+                    int version = extraerVersionArchivo(nombre);
+                    if (version > versionMasAlta) {
+                        versionMasAlta = version;
+                    }
+                }
+            }
+            return versionMasAlta;
+        } catch (Exception e) {
             return 0;
         }
-        
-        int totalArchivosValidos = 0;
-        
-        // Contar archivos válidos
+    }
+    private int extraerVersionArchivo(String nombreArchivo) {
+        try {
+            // Buscar el patrón _NNN.zip al final
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("_(\\d+)\\.zip$");
+            java.util.regex.Matcher matcher = pattern.matcher(nombreArchivo);
+
+            if (matcher.find()) {
+                return Integer.parseInt(matcher.group(1));
+            }
+        } catch (Exception e) {
+            System.err.println("Error extrayendo versión de: " + nombreArchivo);
+        }
+        return 0; // Si no se puede extraer, asumir versión 0
+    }
+
+    /**
+     * Determina si un archivo es el más reciente de su tipo
+     * Sin afectar la lógica existente de control de versiones
+     */
+    private boolean esArchivoMasReciente(String nombreArchivo, Vector<ChannelSftp.LsEntry> archivos) {
+        try {
+            String tipo = nombreArchivo.substring(0, 4); // "ATCG", "ATCL", "ATCR"
+            String fechaArchivo = nombreArchivo.split("_")[1];
+
+            // Buscar el archivo más reciente del mismo tipo
+            String fechaMasReciente = fechaArchivo;
+
+            for (ChannelSftp.LsEntry archivo : archivos) {
+                String nombreOtro = archivo.getFilename();
+                if (nombreOtro.startsWith(tipo) && nombreOtro.matches("ATC[GLR]_.*\\.zip")) {
+                    String fechaOtro = nombreOtro.split("_")[1];
+                    if (fechaOtro.compareTo(fechaMasReciente) > 0) {
+                        fechaMasReciente = fechaOtro;
+                    }
+                }
+            }
+
+            // Este archivo es el más reciente si su fecha es igual a la más reciente encontrada
+            return fechaArchivo.equals(fechaMasReciente);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error verificando archivo más reciente: " + nombreArchivo);
+            return true; // Por defecto, procesar el archivo
+        }
+    }
+
+
+
+
+    /**
+     * Determina si un archivo debe descargarse basado en el último archivo descargado
+     * Los archivos vienen ordenados naturalmente por nombre (fecha + secuencia)
+     */
+    private boolean debeDescargarDesdeUltimo(String nombreArchivo, String ultimoArchivoDescargado, 
+                                            Vector<ChannelSftp.LsEntry> archivos) {
+        if (ultimoArchivoDescargado == null) {
+            return true; // No hay registro previo, descargar todo
+        }
+
+        // Buscar el último archivo descargado en la lista
+        boolean encontradoUltimo = false;
+
         for (ChannelSftp.LsEntry archivo : archivos) {
             String nombre = archivo.getFilename();
-            if (nombre.matches("ATC[GLR]_.*\\.zip")) {
-                totalArchivosValidos++;
+
+            // Cuando encontramos el último archivo descargado
+            if (nombre.equals(ultimoArchivoDescargado)) {
+                encontradoUltimo = true;
+                continue; // Este ya está descargado, saltarlo
+            }
+
+            // Todos los archivos DESPUÉS del último descargado
+            if (encontradoUltimo) {
+                // Si este es el archivo que estamos evaluando, descargarlo
+                if (nombre.equals(nombreArchivo)) {
+                    return true;
+                }
             }
         }
-        
-        log.append("   🎯 Archivos a descargar: ").append(totalArchivosValidos).append("\n");
-        
-        if (totalArchivosValidos == 0) {
-            return 0;
-        }
-        
-        // Descargar CADA archivo válido (sin verificaciones)
-        for (ChannelSftp.LsEntry archivo : archivos) {
-            String nombreArchivo = archivo.getFilename();
-            
-            if (nombreArchivo.matches("ATC[GLR]_.*\\.zip")) {
-                
-                log.append("\n   📦 ").append(nombreArchivo).append(" 🔧\n");
-                
-                // Determinar carpeta destino
-                String carpetaDestino;
-                if (nombreArchivo.contains("ATCG")) {
-                    carpetaDestino = ".";
-                } else if (nombreArchivo.contains("ATCL")) {
-                    carpetaDestino = "lib";
-                } else if (nombreArchivo.contains("ATCR")) {
-                    carpetaDestino = "reportes";
-                } else {
-                    continue;
+
+        // Si llegamos aquí, puede ser que:
+        // - No encontramos el último archivo (fue eliminado del servidor)
+        // - Este archivo está antes del último descargado
+        // Por seguridad, descargar solo si no encontramos el último
+        return !encontradoUltimo;
+    }
+
+
+    //si llegamos hasta aqui con cotrol z es que ya funciona el cierre por conteo con pausa y pasamos a los metodos de forzar descargas 
+
+    /**
+     * Descarga TODAS las actualizaciones ignorando el control de versiones
+     * Útil para equipos muy desactualizados o con problemas en BD
+     */
+    private void descargarTodoForzado() {
+        SwingUtilities.invokeLater(() -> {
+            label2.setText("🔧 FORZANDO DESCARGAS COMPLETAS...");
+            progressBar1.setValue(0);
+            textArea1.setText("Iniciando descargas forzadas...");
+        });
+
+        new Thread(() -> {
+            StringBuilder log = new StringBuilder();
+
+            try {
+                if (conexionSFTP == null || !conexionSFTP.isConectado()) {
+                    log.append("❌ Error: No hay conexión SFTP disponible\n");
+                    actualizarInterfazError(log.toString());
+                    return;
                 }
-                
-                // Crear carpeta destino
-                File carpeta = new File(carpetaDestino);
-                if (!carpeta.exists()) {
-                    carpeta.mkdirs();
-                }
-                
-                // Ruta temporal
-                String rutaTemporal = System.getProperty("java.io.tmpdir") + File.separator + nombreArchivo;
-                
-                // Descargar archivo
-                String rutaRemota = rutaCarpeta + nombreArchivo;
-                boolean descargado = conexionSFTP.descargarArchivo(rutaRemota, rutaTemporal);
-                
-                if (descargado) {
-                    log.append("   ✅ Descargado\n");
-                    
-                    // Extraer ZIP
-                    log.append("   📦 Extrayendo...\n");
-                    boolean extraido = extraerZip(rutaTemporal, carpetaDestino);
-                    
-                    if (extraido) {
-                        archivosDescargados++;
-                        log.append("   ✅ Extraído\n");
-                        
-                        // Registrar en BD (opcional)
-                        if (controlVersiones != null && rfcCliente != null) {
-                            controlVersiones.registrarArchivoDescargado(rfcCliente, nombreArchivo);
-                        }
-                    } else {
-                        log.append("   ❌ Error en extracción\n");
+
+                log.append("✅ Conexión SFTP establecida\n");
+                log.append("🔧 MODO: Descargas forzadas (ignorando control de versiones)\n");
+
+                // ============================================
+                // 1. DESCARGAR ACTUALIZACIONES GENERALES (FORZADO)
+                // ============================================
+                log.append("\n🎯 DESCARGANDO TODAS LAS GENERALES\n");
+                log.append("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n");
+
+                int archivosGeneralesDescargados = descargarActualizacionesDeCarpetaForzado(
+                    log, "./actualizaciones/general/", "GENERALES", "GENERAL");
+
+                // ============================================
+                // 2. DESCARGAR ACTUALIZACIONES POR RFC (FORZADO)
+                // ============================================
+                log.append("\n🎯 DESCARGANDO TODOS LOS RFC\n");
+                log.append("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n");
+
+                int archivosRfcDescargados = 0;
+
+                if (conexionBD != null && listaRFCs != null && !listaRFCs.isEmpty()) {
+                    log.append("📋 RFCs a procesar: ").append(listaRFCs.size()).append("\n\n");
+
+                    for (String rfc : listaRFCs) {
+                        log.append("🔍 RFC: ").append(rfc).append("\n");
+
+                        String rutaCarpetaRFC = "./actualizaciones/" + rfc + "/";
+                        int descargadosEnRFC = descargarActualizacionesDeCarpetaForzado(
+                            log, rutaCarpetaRFC, "RFC " + rfc, rfc);
+                        archivosRfcDescargados += descargadosEnRFC;
+
+                        log.append("✅ ").append(rfc).append(": ").append(descargadosEnRFC).append(" archivos\n");
+                        log.append("────────────────────────────────────────\n");
                     }
-                    
-                } else {
-                    log.append("   ❌ Falló descarga\n");
                 }
-                
-                actualizarInterfazProgreso(log.toString(), archivosDescargados, totalArchivosValidos);
+
+                // ============================================
+                // 3. RESUMEN FINAL
+                // ============================================
+                log.append("\n🎉 DESCARGA FORZADA COMPLETADA\n");
+                log.append("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n");
+                log.append("📦 Actualizaciones generales: ").append(archivosGeneralesDescargados).append(" archivos\n");
+                log.append("📊 Actualizaciones por RFC: ").append(archivosRfcDescargados).append(" archivos\n");
+                log.append("📈 Total: ").append(archivosGeneralesDescargados + archivosRfcDescargados).append(" archivos descargados\n");
+                log.append("💡 Nota: Se ignoró el control de versiones\n");
+
+                final String resultadoFinal = log.toString();
+                SwingUtilities.invokeLater(() -> {
+                    mostrarLineaPorLinea(textArea1, resultadoFinal);
+                    progressBar1.setValue(100);
+                    label2.setText("✅ DESCARGA FORZADA COMPLETADA");
+
+                    // Iniciar contador interactivo
+                    iniciarContadorInteractivo();
+                });
+
+            } catch (Exception e) {
+                log.append("❌ ERROR: ").append(e.getMessage()).append("\n");
+                actualizarInterfazError(log.toString());
             }
-        }
-        
-        log.append("   ✅ ").append(tipoDescarga).append(": ").append(archivosDescargados)
-           .append("/").append(totalArchivosValidos).append(" archivos\n");
-        
-    } catch (Exception e) {
-        log.append("   ❌ Error: ").append(e.getMessage()).append("\n");
+        }).start();
     }
-    
-    return archivosDescargados;
-}
 
 
-private void configurarTeclaF7() {
-    // Crear acción para F7
-    Action forzarDescargasAction = new AbstractAction() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            activarModoForzado();
+    /**
+     * Versión forzada que ignora completamente el control de versiones
+     */
+    private int descargarActualizacionesDeCarpetaForzado(StringBuilder log, String rutaCarpeta, 
+                                                         String tipoDescarga, String rfcCliente) {
+        int archivosDescargados = 0;
+
+        try {
+            log.append("🔧 MODO FORZADO - Descargando todo...\n");
+
+            // Obtener lista de archivos disponibles
+            Vector<ChannelSftp.LsEntry> archivos = conexionSFTP.listarArchivos(rutaCarpeta);
+
+            if (archivos == null || archivos.isEmpty()) {
+                log.append("   ℹ️ No hay archivos en esta carpeta\n");
+                return 0;
+            }
+
+            int totalArchivosValidos = 0;
+
+            // Contar archivos válidos
+            for (ChannelSftp.LsEntry archivo : archivos) {
+                String nombre = archivo.getFilename();
+                if (nombre.matches("ATC[GLR]_.*\\.zip")) {
+                    totalArchivosValidos++;
+                }
+            }
+
+            log.append("   🎯 Archivos a descargar: ").append(totalArchivosValidos).append("\n");
+
+            if (totalArchivosValidos == 0) {
+                return 0;
+            }
+
+            // Descargar CADA archivo válido (sin verificaciones)
+            for (ChannelSftp.LsEntry archivo : archivos) {
+                String nombreArchivo = archivo.getFilename();
+
+                if (nombreArchivo.matches("ATC[GLR]_.*\\.zip")) {
+
+                    log.append("\n   📦 ").append(nombreArchivo).append(" 🔧\n");
+
+                    // Determinar carpeta destino
+                    String carpetaDestino;
+                    if (nombreArchivo.contains("ATCG")) {
+                        carpetaDestino = ".";
+                    } else if (nombreArchivo.contains("ATCL")) {
+                        carpetaDestino = "lib";
+                    } else if (nombreArchivo.contains("ATCR")) {
+                        carpetaDestino = "reportes";
+                    } else {
+                        continue;
+                    }
+
+                    // Crear carpeta destino
+                    File carpeta = new File(carpetaDestino);
+                    if (!carpeta.exists()) {
+                        carpeta.mkdirs();
+                    }
+
+                    // Ruta temporal
+                    String rutaTemporal = System.getProperty("java.io.tmpdir") + File.separator + nombreArchivo;
+
+                    // Descargar archivo
+                    String rutaRemota = rutaCarpeta + nombreArchivo;
+                    boolean descargado = conexionSFTP.descargarArchivo(rutaRemota, rutaTemporal);
+
+                    if (descargado) {
+                        log.append("   ✅ Descargado\n");
+
+                        // Extraer ZIP
+                        log.append("   📦 Extrayendo...\n");
+                        boolean extraido = extraerZip(rutaTemporal, carpetaDestino);
+
+                        if (extraido) {
+                            archivosDescargados++;
+                            log.append("   ✅ Completado\n");
+
+                            // Registrar en BD (opcional)
+                            if (controlVersiones != null && rfcCliente != null) {
+                                controlVersiones.registrarArchivoDescargado(rfcCliente, nombreArchivo);
+                            }
+                        } else {
+                            log.append("   ❌ Error en extracción\n");
+                        }
+
+                    } else {
+                        log.append("   ❌ Falló descarga\n");
+                    }
+
+                    actualizarInterfazProgreso(log.toString(), archivosDescargados, totalArchivosValidos);
+                }
+            }
+
+            log.append("   ✅ ").append(tipoDescarga).append(": ").append(archivosDescargados)
+               .append("/").append(totalArchivosValidos).append(" archivos\n");
+
+        } catch (Exception e) {
+            log.append("   ❌ Error: ").append(e.getMessage()).append("\n");
         }
-    };
-    
-    // Crear el key binding para F7
-    String key = "FORZAR_DESCARGAS";
-    getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), key);
-    getRootPane().getActionMap().put(key, forzarDescargasAction);
-}
 
-/**
- * Activa el modo forzado con confirmación (F7)
- */
-private void activarModoForzado() {
-    int confirmacion = JOptionPane.showConfirmDialog(
-        this, 
-        "¿Activar MODO FORZADO de descargas?\n\n" +
-        "• Descargará TODAS las actualizaciones\n" + 
-        "• Ignorará el control de versiones\n" +
-        "• Útil para equipos desactualizados\n\n" +
-        "¿Continuar?",
-        "🔧 Modo Forzado - F7",
-        JOptionPane.YES_NO_OPTION,
-        JOptionPane.WARNING_MESSAGE
-    );
-    
-    if (confirmacion == JOptionPane.YES_OPTION) {
-        // Mostrar mensaje de activación
-        JOptionPane.showMessageDialog(this,
-            "🔄 Modo forzado activado\n\n" +
-            "Iniciando descarga de TODAS las actualizaciones...",
-            "Modo Forzado Activado",
-            JOptionPane.INFORMATION_MESSAGE);
-        
-        // Ejecutar descargas forzadas
-        descargarTodoForzado();
+        return archivosDescargados;
     }
-}
+
+
+    private void configurarTeclaF7() {
+        // Crear acción para F7
+        Action forzarDescargasAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                activarModoForzado();
+            }
+        };
+
+        // Crear el key binding para F7
+        String key = "FORZAR_DESCARGAS";
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+            KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), key);
+        getRootPane().getActionMap().put(key, forzarDescargasAction);
+    }
+
+    /**
+     * Activa el modo forzado con confirmación (F7)
+     */
+    private void activarModoForzado() {
+        int confirmacion = JOptionPane.showConfirmDialog(
+            this, 
+            "¿Activar MODO FORZADO de descargas?\n" +
+            "• Descargará TODAS las actualizaciones\n" + 
+            "• Ignorará el control de versiones\n" +
+            "• Útil para equipos desactualizados\n\n" +
+            "¿Continuar?",
+            "🔧 Modo Forzado - F7",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            // Mostrar mensaje de activación
+            JOptionPane.showMessageDialog(this,
+                "🔄 Modo forzado activado\n" +
+                "Iniciando descarga de TODAS las actualizaciones...",
+                "Modo Forzado Activado",
+                JOptionPane.INFORMATION_MESSAGE);
+
+            // Ejecutar descargas forzadas
+            descargarTodoForzado();
+        }
+    }
 
     private void actualizarInterfazProgreso(String mensaje, int descargados, int total) {
         SwingUtilities.invokeLater(() -> {
@@ -1023,179 +1048,186 @@ private void activarModoForzado() {
     
     
     private void mostrarLineaPorLinea(JTextArea textArea, String texto) {
-    new Thread(() -> {
-        String[] lineas = texto.split("\n");
-        StringBuilder contenido = new StringBuilder();
-        
-        for (String linea : lineas) {
-            contenido.append(linea).append("\n");
-            SwingUtilities.invokeLater(() -> {
-                textArea.setText(contenido.toString());
-                textArea.setCaretPosition(textArea.getDocument().getLength());
-            });
-            try {
-                Thread.sleep(100); // Pausa entre líneas
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
+        new Thread(() -> {
+            String[] lineas = texto.split("\n");
+            StringBuilder contenido = new StringBuilder();
+
+            for (String linea : lineas) {
+                contenido.append(linea).append("\n");
+                SwingUtilities.invokeLater(() -> {
+                    textArea.setText(contenido.toString());
+                    textArea.setCaretPosition(textArea.getDocument().getLength());
+                });
+                try {
+                    Thread.sleep(100); // Pausa entre líneas
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
-        }
-    }).start();
-}
+        }).start();
+    }
    
   
 
-/**
- * Contador interactivo que se puede pausar/reanudar con clic
- */
-private void iniciarContadorInteractivo() {
-    segundosRestantes = 5; // Reiniciar contador
-    contadorPausado = false;
-    
-    hiloContador = new Thread(() -> {
-        try {
-            while (segundosRestantes > 0) {
-                // Si está pausado, esperar sin contar
-                if (contadorPausado) {
-                    Thread.sleep(100);
-                    continue;
+    /**
+     * Contador interactivo que se puede pausar/reanudar con clic
+     */
+    private void iniciarContadorInteractivo() {
+        segundosRestantes = 5; // Reiniciar contador
+        contadorPausado = false;
+
+        hiloContador = new Thread(() -> {
+            try {
+                while (segundosRestantes > 0) {
+                    // Si está pausado, esperar sin contar
+                    if (contadorPausado) {
+                        Thread.sleep(100);
+                        continue;
+                    }
+
+                    final int segundosActuales = segundosRestantes;
+                    SwingUtilities.invokeLater(() -> {
+                        label1.setText("⏸️ Cierre en " + segundosActuales + "s");
+                    });
+
+                    Thread.sleep(1000); // Esperar 1 segundo
+                    segundosRestantes--;
                 }
-                
-                final int segundosActuales = segundosRestantes;
-                SwingUtilities.invokeLater(() -> {
-                    label1.setText("⏸️ Cierre en " + segundosActuales + "s");
-                });
-                
-                Thread.sleep(1000); // Esperar 1 segundo
-                segundosRestantes--;
-            }
-            
-            // Si llegó a cero y no está pausado, cerrar
-            if (!contadorPausado) {
-                SwingUtilities.invokeLater(() -> {
-                    System.out.println("🔒 Cerrando aplicación automáticamente...");
-                    cerrarConexiones();
-                });
-            }
-            
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    });
-    
-    hiloContador.start();
-}
 
+                // Si llegó a cero y no está pausado, cerrar
+                if (!contadorPausado) {
+                    SwingUtilities.invokeLater(() -> {
+                        System.out.println("🔒 Cerrando aplicación automáticamente...");
+                        cerrarConexiones();
+                    });
+                }
 
-/**
- * Maneja el clic en el label para pausar/reanudar
- */
-private void togglePausaContador() {
-    contadorPausado = !contadorPausado;
-    
-    if (contadorPausado) {
-        label1.setText("⏸️ Cierre PAUSADO ");
-    } else {
-        label1.setText("▶️ Cierre en " + segundosRestantes + "s");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        hiloContador.start();
     }
-}
+
+
+    /**
+     * Maneja el clic en el label para pausar/reanudar
+     */
+    private void togglePausaContador() {
+        contadorPausado = !contadorPausado;
+
+        if (contadorPausado) {
+            label1.setText("⏸️ Cierre PAUSADO ");
+        } else {
+            label1.setText("▶️ Cierre en " + segundosRestantes + "s");
+        }
+    }
+
+    private void actualizarBarraProgreso(int valor, String texto) {
+        SwingUtilities.invokeLater(() -> {
+            progressBar1.setValue(valor);
+            progressBar1.setString(texto);
+        });
+    }
 
     private void configurarInterfaz() {
-    // Restauramos el texto predeterminado. FlatLaf debe manejar el color del texto.
-    
-    // 1. Configurar Títulos y Versión
-    jblTitulo.setText("ACTUALIZADOR DEL SISTEMA");
-    // Eliminamos la configuración de color manual para que FlatLaf determine el contraste
-    jblTitulo.setFont(jblTitulo.getFont().deriveFont(jblTitulo.getFont().getStyle() | Font.BOLD, jblTitulo.getFont().getSize() + 6f));
-    
-    jblVersion.setText("Versión: 2.1.0");
-    // Eliminamos la configuración de color manual.
-    
-    label2.setText("🔍 INICIANDO BÚSQUEDA DE ACTUALIZACIONES...");
-    // Eliminamos la configuración de color manual.
-    
-    // 2. Configurar Barra de Progreso
-    progressBar1.setStringPainted(true);
-    progressBar1.setString("Preparando la conexión...");
-    // Eliminamos la configuración de color manual.
-    
-    // 3. Configurar Paneles y Áreas de Texto (Restaurando y manteniendo solo ajustes funcionales)
-    
-    // Restauramos bordes con títulos simples (FlatLaf se encarga del estilo)
-    panel2.setBorder(BorderFactory.createTitledBorder("📦 ACTUALIZACIONES GENERALES"));
-    
-    textArea1.setText("Iniciando la secuencia de conexión y búsqueda de archivos...");
-    
-    
-    textArea1.setEditable(false);
-    
-    
-    // Mantenemos el ajuste de línea (LineWrap) para evitar el descuadre horizontal
-    textArea1.setLineWrap(true);    
-   
-    
-    // Eliminamos todas las configuraciones de color manuales (setForeground, setBackground)
-    // para permitir que FlatLaf lo maneje correctamente.
+        // Restauramos el texto predeterminado. FlatLaf debe manejar el color del texto.
 
-    // 4. Configurar Resumen y Botones
-    
-    
-    // 5. Configurar la Ventana y el Listener de Cierre (MANTENER ESTO ES VITAL)
-    setTitle("Actualizador del Sistema v2.1.0");
-    
-    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); 
-    
-    addWindowListener(new java.awt.event.WindowAdapter() {
-        @Override
-        public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-            cerrarConexiones();
-        }
-    });
-}
+        // 1. Configurar Títulos y Versión
+        jblTitulo.setText("ACTUALIZADOR");
+        // Eliminamos la configuración de color manual para que FlatLaf determine el contraste
+        jblTitulo.setFont(jblTitulo.getFont().deriveFont(jblTitulo.getFont().getStyle() | Font.BOLD, jblTitulo.getFont().getSize() + 6f));
+
+        jblVersion.setText("Versión: 1.2.0");
+        // Eliminamos la configuración de color manual.
+
+        label2.setText("🔍 INICIANDO BÚSQUEDA DE ACTUALIZACIONES...");
+        // Eliminamos la configuración de color manual.
+
+        // 2. Configurar Barra de Progreso
+        progressBar1.setStringPainted(true);
+        progressBar1.setString("Iniciando...");//si llegamos aqui con control z estamos en la parte donde ya cierra todo y quiero mejorar la interfaz 
+        // Eliminamos la configuración de color manual.
+
+        // 3. Configurar Paneles y Áreas de Texto (Restaurando y manteniendo solo ajustes funcionales)
+
+        // Restauramos bordes con títulos simples (FlatLaf se encarga del estilo)
+        panel2.setBorder(BorderFactory.createTitledBorder("📦 ACTUALIZACIONES GENERALES"));
+
+        textArea1.setText("Iniciando la secuencia de conexión y búsqueda de archivos...");
+
+
+        textArea1.setEditable(false);
+
+
+        // Mantenemos el ajuste de línea (LineWrap) para evitar el descuadre horizontal
+        textArea1.setLineWrap(true);    
+
+
+        // Eliminamos todas las configuraciones de color manuales (setForeground, setBackground)
+        // para permitir que FlatLaf lo maneje correctamente.
+
+        // 4. Configurar Resumen y Botones
+
+
+        // 5. Configurar la Ventana y el Listener de Cierre (MANTENER ESTO ES VITAL)
+        setTitle("Actualizador v1.2.0");
+
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); 
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                cerrarConexiones();
+            }
+        });
+    }
     
 
   private void hacerVentanaNoCerrable() {
-    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-    getRootPane().setWindowDecorationStyle(JRootPane.NONE);
-    
-    addWindowListener(new java.awt.event.WindowAdapter() {
-        @Override
-        public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-            // ✅ PRIMERO el contador
-            try { 
-                Thread.sleep(300000); // 5 segundos de espera
-            } catch (InterruptedException e) { }
-            
-            // ✅ LUEGO el mensaje
-            JOptionPane.showMessageDialog(ActualizadorPR.this,
-                "⏳ Espere a que el proceso termine...\n" +
-                "La aplicación se cerrará automáticamente.",
-                "Cierre No Permitido",
-                JOptionPane.INFORMATION_MESSAGE);
-        }
-    });
-}
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                // ✅ PRIMERO el contador
+                try { 
+                    Thread.sleep(300000); // 5 segundos de espera
+                } catch (InterruptedException e) { }
+
+                // ✅ LUEGO el mensaje
+                JOptionPane.showMessageDialog(ActualizadorPR.this,
+                    "⏳ Espere a que el proceso termine...\n" +
+                    "La aplicación se cerrará automáticamente.",
+                    "Cierre No Permitido",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+    }
     
     
     
     private void cerrarConexiones() {
-    System.out.println("Cerrando conexiones...");
-    
-    // Cerrar conexión SFTP
-    if (conexionSFTP != null) {
-        conexionSFTP.desconectar(); // Asumiendo que su clase 'conexion' tiene un método desconectar()
-        System.out.println("Conexión SFTP cerrada.");
+        System.out.println("Cerrando conexiones...");
+
+        // Cerrar conexión SFTP
+        if (conexionSFTP != null) {
+            conexionSFTP.desconectar(); // Asumiendo que su clase 'conexion' tiene un método desconectar()
+            System.out.println("Conexión SFTP cerrada.");
+        }
+
+        // Cerrar conexión a la Base de Datos
+        if (conexionBD != null) {
+            conexionBD.desconectar(); // Asumiendo que su clase 'ConexionBD' tiene un método cerrarConexion()
+            System.out.println("Conexión BD cerrada.");
+        }
+
+        // Finalizar la aplicación
+        System.exit(0);
     }
-    
-    // Cerrar conexión a la Base de Datos
-    if (conexionBD != null) {
-        conexionBD.desconectar(); // Asumiendo que su clase 'ConexionBD' tiene un método cerrarConexion()
-        System.out.println("Conexión BD cerrada.");
-    }
-    
-    // Finalizar la aplicación
-    System.exit(0);
-}
     
     
     /**
@@ -1252,19 +1284,21 @@ private void togglePausaContador() {
 		"[]"));
 
 	    //---- jblTitulo ----
-	    jblTitulo.setText("ACTUALIZADOR DEL SISTEMA");
+	    jblTitulo.setText("ACTUALIZADOR");
 	    jblTitulo.setFont(jblTitulo.getFont().deriveFont(jblTitulo.getFont().getStyle() | Font.BOLD, jblTitulo.getFont().getSize() + 3f));
-	    panel1.add(jblTitulo, "cell 0 0");
+	    jblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+	    panel1.add(jblTitulo, "cell 0 0 2 1");
 
 	    //---- jblVersion ----
 	    jblVersion.setText("text");
-	    panel1.add(jblVersion, "cell 1 0");
+	    jblVersion.setHorizontalAlignment(SwingConstants.CENTER);
+	    panel1.add(jblVersion, "cell 0 1 2 1");
 	}
 	contentPane.add(panel1, "cell 0 0 5 1");
 
 	//---- label2 ----
 	label2.setText("text");
-	contentPane.add(label2, "cell 0 1");
+	contentPane.add(label2, "cell 0 1 4 1");
 
 	//---- progressBar1 ----
 	progressBar1.setMinimumSize(new Dimension(400, 20));
@@ -1299,7 +1333,7 @@ private void togglePausaContador() {
 
 	//---- label1 ----
 	label1.setText("\u23f3");
-	contentPane.add(label1, "cell 0 4");
+	contentPane.add(label1, "cell 0 4 3 1");
 	pack();
 	setLocationRelativeTo(getOwner());
     }// </editor-fold>//GEN-END:initComponents
